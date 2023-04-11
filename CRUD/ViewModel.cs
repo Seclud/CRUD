@@ -12,66 +12,73 @@ namespace CRUD
 {
     public class ViewModel
     {
-        private  NpgsqlConnection connection;
-        
+        private NpgsqlConnection connection;
+
         //Откроем подключение
         public ViewModel()
         {
             connection =
                 new NpgsqlConnection("Host=localhost;Port=5432;Database=test_db;Username=postgres;Password=C4_Nyb5LD");
-            connection.Open();
-
         }
 
-        public void Create(Product product)
+        public async Task Create(Product product)
         {
-            var command = new NpgsqlCommand("INSERT INTO product (name, cost) VALUES (@name, @cost)",
-                connection);
+            try
+            { await connection.OpenAsync(); }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+            var command = new NpgsqlCommand("INSERT INTO product (name, cost) VALUES (@name, @cost)", connection);
             command.Parameters.AddWithValue("name", product.Name);
             command.Parameters.AddWithValue("cost", product.Cost);
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync();
+            await connection.CloseAsync();
         }
-
-       /* public Product Read(int id)
+        public async Task Update(Product product)
         {
-            var command = new NpgsqlCommand("SELECT * FROM product WHERE id = @id", connection);
-            command.Parameters.AddWithValue("id", @id);
-            var reader = command.ExecuteReader();
-            reader.Read();
-            return new Product()
+            try
+            { await connection.OpenAsync(); }
+            catch (Exception e)
             {
-                Id = reader.GetInt32(0),
-                Name = reader.GetString(1),
-                Cost = reader.GetDouble(2),
-            };
-
-        }*/
-
-        public void Update(Product product)
-        {
+                Console.WriteLine(e.ToString());
+            }
             var command = new NpgsqlCommand("UPDATE product SET name = @name, cost = @cost WHERE id =@id", connection);
             command.Parameters.AddWithValue("name", product.Name);
             command.Parameters.AddWithValue("cost", product.Cost);
             command.Parameters.AddWithValue("id", product.Id);
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync();
+            await connection.CloseAsync();
         }
 
-        public void Delete(Product product)
+        public async Task Delete(Product product)
         {
+            try
+            { await connection.OpenAsync(); }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
             var command = new NpgsqlCommand("DELETE FROM product WHERE id = @id", connection);
             command.Parameters.AddWithValue("id", product.Id);
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync();
+            await connection.CloseAsync();
         }
 
-        public ObservableCollection<Product> Select() //Возвращает лист всех продуктов
+        public async Task<ObservableCollection<Product>> Select() //Возвращает лист всех продуктов
         {
             // Обсервбал круто, потому что получаем нотификейшн сразу
             ObservableCollection<Product> products = new ObservableCollection<Product>();
-
+            try
+            { await connection.OpenAsync(); }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
             var command = new NpgsqlCommand("SELECT * FROM product", connection);
-            var reader = command.ExecuteReader();
+            var reader = await command.ExecuteReaderAsync();
             //Таблицу в лист
-            while (reader.Read())
+            while (await reader.ReadAsync())
             {
                 var product = new Product
                 {
@@ -82,9 +89,9 @@ namespace CRUD
                 products.Add(product);
             }
 
-                reader.Close();
+            reader.Close();
 
-                return products;
+            return products;
         }
     }
 }

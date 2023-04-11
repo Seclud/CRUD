@@ -32,13 +32,20 @@ namespace CRUD
             GetProducts();
             DataContext = viewModel;
         }
-        private void GetProducts() //Возвращает все продукты
+        private async void GetProducts() //Возвращает все продукты
         {
-            products = viewModel.Select();
-            ProductsGridView.ItemsSource = products;
+            try
+            {
+                products = await viewModel.Select();
+                ProductsGridView.ItemsSource = products;
+            }
+            catch (Exception ex) 
+            {
+                MessageBox.Show($"Error: {ex.Message}");
+            }
         }
         private void ProductsGridView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
+        {   
             if (ProductsGridView.SelectedItem != null)
             {
                 // Преобразуем выбранный объект в продукт
@@ -61,23 +68,44 @@ namespace CRUD
             selectedProduct.Cost = double.Parse(PriceNumeric.Text);
             selectedProduct.Id = choosenid;
         }
-        private void CreateProductButton_Click(object sender, RoutedEventArgs e)
+        private async void CreateProductButton_Click(object sender, RoutedEventArgs e)
         {
-            UpdateSelectedProduct();
-            viewModel.Create(selectedProduct);
-            GetProducts();
+            try
+            {
+                UpdateSelectedProduct();
+                await viewModel.Create(selectedProduct);
+                GetProducts();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}");
+            }
         }
-        private void UpdateProductButton_Click(object sender, RoutedEventArgs e)
+        private async void UpdateProductButton_Click(object sender, RoutedEventArgs e)
         {
-            UpdateSelectedProduct();
-            viewModel.Update(selectedProduct);
-            GetProducts();
+            try
+            {
+                UpdateSelectedProduct();
+                await viewModel.Update(selectedProduct);
+                GetProducts();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}");
+            }
         }
-        private void DeleteProductButton_Click(object sender, RoutedEventArgs e)
+        private async void DeleteProductButton_Click(object sender, RoutedEventArgs e)
         {
-            UpdateSelectedProduct();
-            viewModel.Delete(selectedProduct);
-            GetProducts();
+            try
+            {
+                UpdateSelectedProduct();
+                await viewModel.Delete(selectedProduct);
+                GetProducts();
+            }
+            catch (Exception ex) 
+            {
+                MessageBox.Show($"Error: {ex.Message}");
+            }
         }
     }
 }
