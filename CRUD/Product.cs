@@ -7,15 +7,12 @@ using System.Threading.Tasks;
 
 namespace CRUD
 {
-    public class Product: INotifyPropertyChanged
+    public class Product : INotifyPropertyChanged
     {
         private int _id;
-        public int Id   
+        public int Id
         {
-            get
-            {
-                return _id;
-            }
+            get => _id;
             set
             {
                 if (_id != value)
@@ -29,10 +26,7 @@ namespace CRUD
         private string _name;
         public string Name
         {
-            get
-            {
-                return _name;
-            }
+            get => _name;
             set
             {
                 if (_name != value)
@@ -47,10 +41,7 @@ namespace CRUD
 
         public double Cost
         {
-            get
-            {
-                return _cost;
-            }
+            get => _cost;
             set
             {
                 if (_cost != value)
@@ -60,17 +51,12 @@ namespace CRUD
                 }
             }
         }
-        public virtual void RaisePropertyChanged(string propertyName)
-        {
-            OnPropertyChanged(propertyName);
-        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged(string propertyName)
         {
 
-
-            PropertyChangedEventHandler handler = this.PropertyChanged;
+            var handler = this.PropertyChanged;
             if (handler != null)
             {
                 var e = new PropertyChangedEventArgs(propertyName);

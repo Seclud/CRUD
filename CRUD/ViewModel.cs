@@ -12,72 +12,46 @@ namespace CRUD
 {
     public class ViewModel
     {
-        private NpgsqlConnection connection;
+        private NpgsqlConnection _connection;
+        private readonly string _connectionString = "Host=localhost;Port=5432;Database=test_db;Username=postgres;Password=qwerty1";
 
-        //Откроем подключение
+        //Сразу открываем подключение
         public ViewModel()
         {
-            connection =
-                new NpgsqlConnection("Host=localhost;Port=5432;Database=test_db;Username=postgres;Password=C4_Nyb5LD");
+            _connection =
+                new NpgsqlConnection(_connectionString);
+            _connection.Open();
         }
 
-        public async Task Create(Product product)
+        public async Task Create(Product product) //Добавление продукта
         {
-            try
-            { await connection.OpenAsync(); }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            var command = new NpgsqlCommand("INSERT INTO product (name, cost) VALUES (@name, @cost)", connection);
+            var command = new NpgsqlCommand("INSERT INTO product (name, cost) VALUES (@name, @cost)", _connection);
             command.Parameters.AddWithValue("name", product.Name);
             command.Parameters.AddWithValue("cost", product.Cost);
             await command.ExecuteNonQueryAsync();
-            await connection.CloseAsync();
         }
-        public async Task Update(Product product)
+        public async Task Update(Product product) //Обновление продукта (его изменение)
         {
-            try
-            { await connection.OpenAsync(); }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            var command = new NpgsqlCommand("UPDATE product SET name = @name, cost = @cost WHERE id =@id", connection);
+            var command = new NpgsqlCommand("UPDATE product SET name = @name, cost = @cost WHERE id =@id", _connection);
             command.Parameters.AddWithValue("name", product.Name);
             command.Parameters.AddWithValue("cost", product.Cost);
             command.Parameters.AddWithValue("id", product.Id);
             await command.ExecuteNonQueryAsync();
-            await connection.CloseAsync();
         }
 
-        public async Task Delete(Product product)
+        public async Task Delete(Product product) // Удаление продукта
         {
-            try
-            { await connection.OpenAsync(); }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            var command = new NpgsqlCommand("DELETE FROM product WHERE id = @id", connection);
+            var command = new NpgsqlCommand("DELETE FROM product WHERE id = @id", _connection);
             command.Parameters.AddWithValue("id", product.Id);
             await command.ExecuteNonQueryAsync();
-            await connection.CloseAsync();
         }
 
-        public async Task<ObservableCollection<Product>> Select() //Возвращает лист всех продуктов
+        public async Task<ObservableCollection<Product>> Read()  //Чтение таблицы в коллекцию
         {
-            // Обсервбал круто, потому что получаем нотификейшн сразу
-            ObservableCollection<Product> products = new ObservableCollection<Product>();
-            try
-            { await connection.OpenAsync(); }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            var command = new NpgsqlCommand("SELECT * FROM product", connection);
+            var products = new ObservableCollection<Product>();
+            var command = new NpgsqlCommand("SELECT * FROM product", _connection);
             var reader = await command.ExecuteReaderAsync();
-            //Таблицу в лист
+
             while (await reader.ReadAsync())
             {
                 var product = new Product
@@ -89,7 +63,7 @@ namespace CRUD
                 products.Add(product);
             }
 
-            reader.Close();
+            await reader.CloseAsync();
 
             return products;
         }
